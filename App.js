@@ -1,113 +1,108 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
   Text,
-  StatusBar,
+  Button,
+  FlatList,
+  Image,
+  View,
+  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-const App: () => React$Node = () => {
+  useEffect(() => {
+    const requestMovies = async () => {
+      setLoading(true);
+
+      const req = await fetch('https://api.b7web.com.br/cinema/');
+      const json = await req.json();
+
+      if (json) {
+        setMovies(json);
+      }
+
+      setLoading(false);
+    };
+
+    requestMovies();
+  }, []);
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <SafeAreaView style={styles.container}>
+      {loading && (
+        <View style={styles.loadingArea}>
+          <ActivityIndicator size="large" color="#FFF" />
+          <Text style={styles.loadingText}>Carregando...</Text>
+        </View>
+      )}
+      {!loading && (
+        <>
+          <Text style={styles.totalMoviesText}>
+            Todal de Filmes: {movies.length}
+          </Text>
+          <FlatList
+            style={styles.list}
+            data={movies}
+            renderItem={({ item }) => (
+              <View style={styles.movieItem}>
+                <Image
+                  style={styles.movieImage}
+                  source={{ uri: item.avatar }}
+                  resizeMode="contain"
+                />
+                <Text style={styles.movieTitle}>{item.titulo}</Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.titulo}
+          />
+        </>
+      )}
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
+  container: { flex: 1, backgroundColor: '#333' },
+
+  totalMoviesText: {
+    color: '#FFF',
     fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 10,
   },
-  highlight: {
-    fontWeight: '700',
+
+  list: {
+    flex: 1,
   },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+
+  movieItem: {
+    marginBottom: 30,
+  },
+
+  movieImage: {
+    height: 400,
+  },
+
+  movieTitle: {
+    color: '#FFF',
+    fontSize: 24,
+    textAlign: 'center',
+    marginTop: 5,
+  },
+
+  loadingArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  loadingText: {
+    color: '#FFF',
   },
 });
 
