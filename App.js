@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   Text,
-  Button,
   FlatList,
   Image,
   View,
